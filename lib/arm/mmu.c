@@ -15,8 +15,9 @@ extern unsigned long etext;
 pgd_t *mmu_idmap;
 
 static cpumask_t mmu_disabled_cpumask;
+unsigned int mmu_disabled_cpu_count;
 
-bool mmu_enabled(void)
+bool __mmu_enabled(void)
 {
 	int cpu = current_thread_info()->cpu;
 
@@ -30,7 +31,9 @@ void mmu_enable(pgd_t *pgtable)
 
 	asm_mmu_enable(__pa(pgtable));
 	flush_tlb_all();
-	cpumask_clear_cpu(cpu, &mmu_disabled_cpumask);
+
+	if (cpumask_test_and_clear_cpu(cpu, &mmu_disabled_cpumask))
+		--mmu_disabled_cpu_count;
 }
 
 extern void asm_mmu_disable(void);
@@ -39,6 +42,8 @@ void mmu_disable(void)
 	int cpu = current_thread_info()->cpu;
 
 	cpumask_set_cpu(cpu, &mmu_disabled_cpumask);
+	++mmu_disabled_cpu_count;
+
 	asm_mmu_disable();
 }
 
