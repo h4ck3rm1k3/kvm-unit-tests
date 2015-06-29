@@ -40,6 +40,7 @@ void phys_alloc_show(void)
 
 void phys_alloc_init(phys_addr_t base_addr, phys_addr_t size)
 {
+	spin_lock_init(&lock);
 	spin_lock(&lock);
 	base = base_addr;
 	top = base + size;

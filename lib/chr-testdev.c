@@ -52,6 +52,8 @@ void chr_testdev_init(void)
 	struct virtqueue *vqs[2];
 	int ret;
 
+	spin_lock_init(&lock);
+
 	vcon = virtio_bind(VIRTIO_ID_CONSOLE);
 	if (vcon == NULL) {
 		printf("%s: %s: can't find a virtio-console\n",

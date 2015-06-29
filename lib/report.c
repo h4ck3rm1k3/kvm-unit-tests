@@ -43,6 +43,13 @@ void report_prefix_pop(void)
 	spin_unlock(&lock);
 }
 
+void report_init(const char *prefix)
+{
+	spin_lock_init(&lock);
+	if (prefix)
+		report_prefix_push(prefix);
+}
+
 void va_report_xfail(const char *msg_fmt, bool xfail, bool cond, va_list va)
 {
 	char *pass = xfail ? "XPASS" : "PASS";
