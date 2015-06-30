@@ -10,6 +10,7 @@ ifeq ($(LOADADDR),)
 endif
 
 tests-common = \
+	$(TEST_DIR)/secondary-leak.flat \
 	$(TEST_DIR)/selftest.flat
 
 ifneq ($(TEST),)
@@ -76,3 +77,4 @@ test_cases: $(generated_files) $(tests-common) $(tests)
 
 $(TEST_DIR)/$(TEST).elf: $(cstart.o) $(TEST_DIR)/$(TEST).o
 $(TEST_DIR)/selftest.elf: $(cstart.o) $(TEST_DIR)/selftest.o
+$(TEST_DIR)/secondary-leak.elf: $(cstart.o) $(TEST_DIR)/secondary-leak.o
