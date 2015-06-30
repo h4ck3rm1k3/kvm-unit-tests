@@ -30,6 +30,8 @@ int nr_cpus;
 
 phys_addr_t __phys_offset, __phys_end;
 
+bool first_boot = true;
+
 static void cpu_set(int fdtnode __unused, u32 regval, void *info __unused)
 {
 	int cpu = nr_cpus++;
@@ -75,20 +77,33 @@ void setup(const void *fdt)
 
 	uart_early_init();
 
-	/*
-	 * Move the fdt to just above the stack. The free memory
-	 * then starts just after the fdt.
-	 */
-	fdt_size = fdt_totalsize(fdt);
-	assert(fdt_move(fdt, &stacktop, fdt_size) == 0);
-	assert(dt_init(&stacktop) == 0);
+	if (first_boot) {
+		/*
+		 * Move the fdt to just above the stack. The free memory
+		 * then starts just after the fdt.
+		 */
+		fdt_size = fdt_totalsize(fdt);
+		assert(fdt_move(fdt, &stacktop, fdt_size) == 0);
+		assert(dt_init(&stacktop) == 0);
+	} else {
+		fdt_size = fdt_totalsize(dt_fdt());
+	}
 
 	mem_init(PAGE_ALIGN((unsigned long)&stacktop + fdt_size));
 	io_init();
-	cpu_init();
+
+	if (first_boot) {
+		cpu_init();
+	} else {
+		mmu_cpu_reset_disabled();
+		cpumask_clear(&cpu_online_mask);
+		set_cpu_online(0, true);
+	}
 
 	thread_info_init(current_thread_info(), 0);
 
 	assert(dt_get_bootargs(&bootargs) == 0);
 	setup_args(bootargs);
+
+	first_boot = false;
 }
