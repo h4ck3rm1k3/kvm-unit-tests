@@ -45,6 +45,7 @@ void phys_alloc_init(phys_addr_t base_addr, phys_addr_t size)
 	base = base_addr;
 	top = base + size;
 	align_min = DEFAULT_MINIMUM_ALIGNMENT;
+	nr_regions = 0;
 	spin_unlock(&lock);
 }
 
