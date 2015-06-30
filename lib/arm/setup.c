@@ -21,6 +21,7 @@
 #include <asm/smp.h>
 
 extern unsigned long stacktop;
+extern void uart_early_init(void);
 extern void io_init(void);
 extern void setup_args(const char *args);
 
@@ -71,6 +72,8 @@ void setup(const void *fdt)
 {
 	const char *bootargs;
 	u32 fdt_size;
+
+	uart_early_init();
 
 	/*
 	 * Move the fdt to just above the stack. The free memory

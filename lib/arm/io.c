@@ -44,6 +44,11 @@ static void uart0_init(void)
 	uart0_base = ioremap(base.addr, base.size);
 }
 
+void uart_early_init(void)
+{
+	spin_lock_init(&uart_lock);
+}
+
 void io_init(void)
 {
 	uart0_init();
