@@ -2,6 +2,7 @@
 #define __ASMARM_MMU_API_H_
 extern pgd_t *mmu_idmap;
 extern unsigned int mmu_disabled_cpu_count;
+extern void mmu_cpu_reset_disabled(void);
 extern bool __mmu_enabled(void);
 static inline bool mmu_enabled(void)
 {

@@ -17,6 +17,12 @@ pgd_t *mmu_idmap;
 static cpumask_t mmu_disabled_cpumask;
 unsigned int mmu_disabled_cpu_count;
 
+void mmu_cpu_reset_disabled(void)
+{
+	cpumask_clear(&mmu_disabled_cpumask);
+	mmu_disabled_cpu_count = 0;
+}
+
 bool __mmu_enabled(void)
 {
 	int cpu = current_thread_info()->cpu;
