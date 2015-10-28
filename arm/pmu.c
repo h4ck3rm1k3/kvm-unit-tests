@@ -14,6 +14,8 @@
  */
 #include "libcflat.h"
 
+#define NR_SAMPLES 10
+
 #if defined(__arm__)
 static inline uint32_t get_pmcr(void)
 {
@@ -22,6 +24,25 @@ static inline uint32_t get_pmcr(void)
 	asm volatile("mrc p15, 0, %0, c9, c12, 0" : "=r" (ret));
 	return ret;
 }
+
+static inline void set_pmcr(uint32_t pmcr)
+{
+	asm volatile("mcr p15, 0, %0, c9, c12, 0" : : "r" (pmcr));
+}
+
+/*
+ * While PMCCNTR can be accessed as a 64 bit coprocessor register, returning 64
+ * bits doesn't seem worth the trouble when differential usage of the result is
+ * expected (with differences that can easily fit in 32 bits). So just return
+ * the lower 32 bits of the cycle count in AArch32.
+ */
+static inline unsigned long get_pmccntr(void)
+{
+	unsigned long cycles;
+
+	asm volatile("mrc p15, 0, %0, c9, c13, 0" : "=r" (cycles));
+	return cycles;
+}
 #elif defined(__aarch64__)
 static inline uint32_t get_pmcr(void)
 {
@@ -29,6 +50,19 @@ static inline uint32_t get_pmcr(void)
 
 	asm volatile("mrs %0, pmcr_el0" : "=r" (ret));
 	return ret;
+}
+
+static inline void set_pmcr(uint32_t pmcr)
+{
+	asm volatile("msr pmcr_el0, %0" : : "r" (pmcr));
+}
+
+static inline unsigned long get_pmccntr(void)
+{
+	unsigned long cycles;
+
+	asm volatile("mrs %0, pmccntr_el0" : "=r" (cycles));
+	return cycles;
 }
 #endif
 
@@ -72,11 +106,37 @@ static bool check_pmcr(void)
 	return pmu.implementer != 0;
 }
 
+/*
+ * Ensure that the cycle counter progresses between back-to-back reads.
+ */
+static bool check_cycles_increase(void)
+{
+	struct pmu_data pmu = {0};
+
+	pmu.enable = 1;
+	set_pmcr(pmu.pmcr_el0);
+
+	for (int i = 0; i < NR_SAMPLES; i++) {
+		unsigned long a, b;
+
+		a = get_pmccntr();
+		b = get_pmccntr();
+
+		if (a >= b) {
+			printf("Read %ld then %ld.\n", a, b);
+			return false;
+		}
+	}
+
+	return true;
+}
+
 int main(void)
 {
 	report_prefix_push("pmu");
 
 	report("Control register", check_pmcr());
+	report("Monotonically increasing cycle count", check_cycles_increase());
 
 	return report_summary();
 }
