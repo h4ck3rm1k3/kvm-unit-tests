@@ -12,9 +12,11 @@ cflatobjs += lib/arm64/processor.o
 cflatobjs += lib/arm64/spinlock.o
 
 # arm64 specific tests
-tests =
+tests = $(TEST_DIR)/test-exinj.flat
 
 include config/config-arm-common.mak
 
 arch_clean: arm_clean
 	$(RM) lib/arm64/.*.d
+
+$(TEST_DIR)/test-exinj.elf: $(cstart.o) $(TEST_DIR)/test-exinj.o
