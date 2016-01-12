@@ -204,7 +204,8 @@ void thread_info_init(struct thread_info *ti, unsigned int flags)
 	vector_handlers_default_init(ti->vector_handlers);
 }
 
-void start_usr(void (*func)(void *arg), void *arg, unsigned long sp_usr)
+static void __start_usr(void (*func)(void *arg), void *arg,
+			unsigned long sp_usr, unsigned int cpsr)
 {
 	sp_usr &= (~15UL); /* stack ptr needs 16-byte alignment */
 
@@ -215,9 +216,20 @@ void start_usr(void (*func)(void *arg), void *arg, unsigned long sp_usr)
 		"msr	sp_el0, %1\n"
 		"msr	elr_el1, %2\n"
 		"mov	x3, xzr\n"	/* clear and "set" PSR_MODE_EL0t */
+		"orr	x3, x3, %3\n"
 		"msr	spsr_el1, x3\n"
 		"eret\n"
-	:: "r" (arg), "r" (sp_usr), "r" (func) : "x0", "x3");
+	: : "r" (arg), "r" (sp_usr), "r" (func), "r" (cpsr) : "x0", "x3");
+}
+
+void start_usr(void (*func)(void *arg), void *arg, unsigned long sp_usr)
+{
+	__start_usr(func, arg, sp_usr, 0);
+}
+
+void start_usr_compat(void (*func)(void *arg), void *arg, unsigned long sp_usr)
+{
+	__start_usr(func, arg, sp_usr, PSR_MODE32_BIT);
 }
 
 bool is_user(void)

@@ -74,6 +74,8 @@ DEFINE_GET_SYSREG32(mpidr)
 #define mpidr_to_cpu(mpidr) ((int)((mpidr) & 0xff))
 
 extern void start_usr(void (*func)(void *arg), void *arg, unsigned long sp_usr);
+extern void start_usr_compat(void (*func)(void *arg), void *arg,
+			     unsigned long sp_usr);
 extern bool is_user(void);
 
 #endif /* !__ASSEMBLY__ */
