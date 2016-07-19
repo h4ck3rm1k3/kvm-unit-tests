@@ -192,6 +192,8 @@ void vector_handlers_default_init(vector_fn *handlers)
 	handlers[EL1H_IRQ]	= default_vector_irq_handler;
 	handlers[EL0_SYNC_64]	= default_vector_sync_handler;
 	handlers[EL0_IRQ_64]	= default_vector_irq_handler;
+	handlers[EL0_SYNC_32]	= default_vector_sync_handler;
+	handlers[EL0_IRQ_32]	= default_vector_irq_handler;
 }
 
 void do_handle_exception(enum vector v, struct pt_regs *regs, unsigned int esr)
@@ -233,7 +235,8 @@ void thread_info_init(struct thread_info *ti, unsigned int flags)
 	vector_handlers_default_init(ti->vector_handlers);
 }
 
-void start_usr(void (*func)(void *arg), void *arg, unsigned long sp_usr)
+static void __start_usr(void (*func)(void *arg), void *arg,
+			unsigned long sp_usr, unsigned int spsr)
 {
 	sp_usr &= (~15UL); /* stack ptr needs 16-byte alignment */
 
@@ -243,10 +246,20 @@ void start_usr(void (*func)(void *arg), void *arg, unsigned long sp_usr)
 		"mov	x0, %0\n"
 		"msr	sp_el0, %1\n"
 		"msr	elr_el1, %2\n"
-		"mov	x3, xzr\n"	/* clear and "set" PSR_MODE_EL0t */
-		"msr	spsr_el1, x3\n"
+		"msr	spsr_el1, %3\n"
+		"isb\n"
 		"eret\n"
-	:: "r" (arg), "r" (sp_usr), "r" (func) : "x0", "x3");
+	:: "r" (arg), "r" (sp_usr), "r" (func), "r" (spsr) : "x0");
+}
+
+void start_usr(void (*func)(void *arg), void *arg, unsigned long sp_usr)
+{
+	__start_usr(func, arg, sp_usr, 0);
+}
+
+void start_usr32(void (*func)(void *arg), void *arg, unsigned long sp_usr)
+{
+	__start_usr(func, arg, sp_usr, PSR_MODE32_BIT);
 }
 
 bool is_user(void)
