@@ -12,7 +12,7 @@ cflatobjs += lib/arm64/processor.o
 cflatobjs += lib/arm64/spinlock.o
 
 # arm64 specific tests
-tests =
+tests = $(TEST_DIR)/emul-abort.flat
 
 include $(TEST_DIR)/Makefile.common
 
