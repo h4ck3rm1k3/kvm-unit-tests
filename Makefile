@@ -106,7 +106,7 @@ cscope:
 generatetest:
 	bash -x run_qemu.sh > exec.txt 2> exec2.txt
 
-mytest:
+parse:
 	perl parse.pl  exec2.txt 
 
 stash :

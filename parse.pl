@@ -10,7 +10,7 @@ sub data {
     my $hash = shift;
     #print Dumper($hash);
     for my $x (keys %{$hash}){
-	next unless $x =~ /IP/;
+	#next unless $x =~ /IP/;
 	my $new = $hash->{$x} || 0;
 	my $old = $names {$x} || 0;
 	
@@ -24,9 +24,9 @@ sub data {
 
 		if ($seen{$new}){
 
-		    if (!$seen{"$old$new"}++){
+		    #if (!$seen{"$old$new"}++){
 			print "\"$old\" -> \"$new\";\n";
-		    }
+		    #}
 		}
 		$seen{$new}++;
 	    }
@@ -129,7 +129,7 @@ while(<>){
 	#print "Linking",join("|",@d),"\n";
     }
     else {	
-	die "BAD:'$_'";
+	warn "BAD:'$_'";
     }
 
     
