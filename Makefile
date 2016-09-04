@@ -107,3 +107,6 @@ generatetest:
 
 mytest:
 	perl parse.pl  exec2.txt 
+
+stash :
+	/opt/logstash/bin/logstash -f logstash.conf #--configtest
