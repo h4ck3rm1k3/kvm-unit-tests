@@ -53,6 +53,7 @@ fnostack_protector_all := $(call cc-option, -fno-stack-protector-all, "")
 CFLAGS += $(fomit_frame_pointer)
 CFLAGS += $(fno_stack_protector)
 CFLAGS += $(fno_stack_protector_all)
+CFLAGS += -fdump-rtl-all -dA -dD -dp -dP -fdump-ipa-all -fdump-tree-all -save-temps
 
 CXXFLAGS += $(CFLAGS)
 
