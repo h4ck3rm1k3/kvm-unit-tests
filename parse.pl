@@ -1,60 +1,60 @@
 my %names ;
-    
-my %names2 = (
-    A20 => 1,
-    CCD => 1,
-    CCO => 1,
-    CCS => 1,
-    CPL => 1,
-    CR0 => 1,
-    CR2 => 1,
-    CR3 => 1,
-    CR4 => 1,
-    DPL => 1,
-    DR0 => 1,
-    DR1 => 1,
-    DR2 => 1,
-    DR3 => 1,
-    DR6 => 1,
-    DR7 => 1,
-    EAX => 1,
-    EBP => 1,
-    EBX => 1,
-    ECX => 1,
-    EDI => 1,
-    EDX => 1,
-    EFER => 1,
-    EFL => 1,
-    EIP => 1,
-    ESI => 1,
-    ESP => 1,
-    FER => 1,
-    GDT => 1,
-    HLT => 1,
-    IDT => 1,
-    LDT => 1,
-    R10 => 1,
-    R11 => 1,
-    R12 => 1,
-    R13 => 1,
-    R14 => 1,
-    R15 => 1,
-    RAX => 1,
-    RBP => 1,
-    RBX => 1,
-    RCX => 1,
-    RDI => 1,
-    RDX => 1,
-    RFL => 1,
-    RIP => 1,
-    RSI => 1,
-    RSP => 1,
-    SMM => 1,
-    iobase => 1,
-    iosize => 1,
-    obase => 1,
-    osize => 1,
-    );
+   
+# my %names2 = (
+#     A20 => 1,
+#     CCD => 1,
+#     CCO => 1,
+#     CCS => 1,
+#     CPL => 1,
+#     CR0 => 1,
+#     CR2 => 1,
+#     CR3 => 1,
+#     CR4 => 1,
+#     DPL => 1,
+#     DR0 => 1,
+#     DR1 => 1,
+#     DR2 => 1,
+#     DR3 => 1,
+#     DR6 => 1,
+#     DR7 => 1,
+#     EAX => 1,
+#     EBP => 1,
+#     EBX => 1,
+#     ECX => 1,
+#     EDI => 1,
+#     EDX => 1,
+#     EFER => 1,
+#     EFL => 1,
+#     EIP => 1,
+#     ESI => 1,
+#     ESP => 1,
+#     FER => 1,
+#     GDT => 1,
+#     HLT => 1,
+#     IDT => 1,
+#     LDT => 1,
+#     R10 => 1,
+#     R11 => 1,
+#     R12 => 1,
+#     R13 => 1,
+#     R14 => 1,
+#     R15 => 1,
+#     RAX => 1,
+#     RBP => 1,
+#     RBX => 1,
+#     RCX => 1,
+#     RDI => 1,
+#     RDX => 1,
+#     RFL => 1,
+#     RIP => 1,
+#     RSI => 1,
+#     RSP => 1,
+#     SMM => 1,
+#     iobase => 1,
+#     iosize => 1,
+#     obase => 1,
+#     osize => 1,
+#     );
 
 sub rec {
     my $d = shift;
@@ -64,36 +64,104 @@ sub rec {
     }
 }
 my $hex = '[a-f0-9]';
+use Data::Dumper;
+
+sub data {
+
+}
+    
+sub proc {
+    my %d = @_;
+    data(\%d) . "\n";
+}
+
+sub proc2 {
+    my %d = @_;
+    data(\%d) . "\n";
+}
+
+sub proc4 {
+    #my @d = @_;
+    my @args;
+    my $name =shift;
+    for (1..4) {
+	push @args, shift;
+    }
+    my $name2 = shift;
+
+    my $val2 = shift;
+    my $name3 = shift;
+    data({	$name => join("",@args),	$name2 => $val2,	$name3 =>shift}) . "\n";
+}
+
+sub proc4a {
+    #my @d = @_;
+    my @args;
+    my $name =shift;
+    for (1..4) {
+	push @args, shift;
+    }
+    data({	$name => join("",@args) }). "\n";
+}
+
+sub proc2a {
+    #my @d = @_;
+    my @args;
+    my $name =shift;
+    for (1..2) {
+	push @args, shift;
+    }
+    data({	$name => join("",@args) }). "\n";
+}
 
 while(<>){
     chomp;
     #print "CHECK INPUT:'$_'\n";
+    my @d;
     
-    if(/^EAX=($hex+) EBX=($hex+) ECX=($hex+) EDX=($hex+)$/){
+    if(@d =/^(EAX)=($hex+)\s(EBX)=($hex+)\s(ECX)=($hex+)\s(EDX)=($hex+)$/){	proc @d;    }   
+    elsif(@d=/^(DR0)=($hex+)\s(DR1)=($hex+)\s(DR2)=($hex+)\s(DR3)=($hex+)\s$/){	proc @d;    }
+    elsif(@d=/^(DR6)=($hex+)\s(DR7)=($hex+)$/){	proc @d;    }
+    elsif(@d=/^(EFER)=($hex+)/){   	proc @d;    }
+    elsif(@d=/^(EIP)=($hex+)\s(EFL)=($hex+)(?<fake>\s)\[([\-ZOACSP]+)\]\s(CPL)=($hex+)\s(II)=($hex+)\s(A20)=($hex+)\s(SMM)=($hex+)\s(HLT)=($hex+)\s*$/){   	proc @d;    }
+    elsif(@d=/^(ESI)=($hex+)\s(EDI)=($hex+)\s(EBP)=($hex+)\s(ESP)=($hex+)\s*$/){   	proc @d;    }
+    elsif(@d=/^(R12)=($hex+)\s(R13)=($hex+)\s(R14)=($hex+)\s(R15)=($hex+)/){	proc @d;    }
+    elsif(@d=/^(R8)\s=($hex+)\s(R9)\s=($hex+)\s(R10)=($hex+)\s(R11)=($hex+)$/){	proc @d;    }
+    elsif(@d=/^(RAX)=($hex+)\s(RBX)=($hex+)\s(RCX)=($hex+)\s(RDX)=($hex+)/){   	proc @d;    }
+    elsif(@d=/^(CCS)=($hex+)\s(CCD)=($hex+)\s(CCO)=(\w+)\s+$/){	proc @d;    }
+    elsif(@d=/^(CR0)=($hex+)\s(CR2)=($hex+)\s(CR3)=($hex+)\s(CR4)=($hex+)$/){	proc @d;    }
+    elsif(@d=/^(RIP)=($hex+)\s(RFL)=($hex+)\s(CPL)=($hex+)\s(II)=($hex+)\s(A20)=($hex+)\s(SMM)=($hex+)\s(HLT)=($hex+)/) {	proc @d;    }
+    elsif(@d=/^(RIP)=($hex+)\s(RFL)=($hex+)(\s)\[([\-ZACSP]+)\]\s(CPL)=($hex+)\s(II)=($hex+)\s(A20)=($hex+)\s(SMM)=($hex+)\s(HLT)=($hex+)$/){	proc @d;    }
+    elsif(@d=/^(RSI)=($hex+)\s(RDI)=($hex+)\s(RBP)=($hex+)\s(RSP)=($hex+)/){	proc @d;    }
+
+    
+    elsif(@d=/^([GECSDF]S)\s=($hex+)\s($hex+)\s($hex+)\s($hex+)\sDPL=($hex+)\s([CSDEFG]S(?:16|32)?)?\s+\[(.+)\]$/){	proc4 @d;    }
+    elsif(@d=/^(TR)\s=($hex+)\s($hex+)\s($hex+)\s($hex+)\s(DPL)=($hex+)\s(TSS(?:32|64))\-(busy|avl)$/){	proc4 @d;    }
+    elsif(@d=/^(CS)\s=($hex+)\s($hex+)\s($hex+)\s($hex+)\s(DPL)=($hex+)\s(CS(?:64|32))\s(.+)$/){	proc4 @d;    }
+    elsif(@d=/^(LDT)=($hex+)\s($hex+)\s($hex+)\s($hex+)\s(DPL)=($hex+)\s(LDT)$/){	proc4 @d;    }
+    
+    ###
+
+    elsif(@d=/^([CSEDFG]S)\s*=($hex+) ($hex+) ($hex+) ($hex+)$/){ 	proc4a @d;    }
+    elsif(@d=/^(LDT)=($hex+) ($hex+) ($hex+) ($hex+)$/){	proc4a @d;    }
+    elsif(@d=/^(TR)\s=($hex+) ($hex+) ($hex+) ($hex+)$/){	proc4a @d;    }
+
+    elsif(@d=/^([GI]DT)=\s+($hex+) ($hex+)$/){proc2a @d; }
+    elsif(/\+ qemu-system-x86_64/) {
+	# skip
     }
-    
-    elsif(/^([GECSDF])S\s=($hex+)\s($hex+)\s($hex+)\s($hex+)\sDPL=($hex+)\s[CSDEFG]S(16|32)?\s+\[(.+)\]$/){}
-    elsif(/^CCS=($hex+)\sCCD=($hex+)\sCCO=(\w+)\s+$/){}
-    elsif(/^CR0=($hex+)\sCR2=($hex+)\sCR3=($hex+)\sCR4=($hex+)$/){}
-    elsif(/^DR0=($hex+)\sDR1=($hex+)\sDR2=($hex+)\sDR3=($hex+)\s$/){}
-    elsif(/^DR6=($hex+)\sDR7=($hex+)$/){}
-    elsif(/^EFER=($hex+)/){    }
-    elsif(/^EIP=(.+)EFL=(.+)CPL=(.+)II=(.+)A20=(.+)SMM=(.+)HLT=(.+)$/){    }
-    elsif(/^ESI=(.+)EDI=(.+)EBP=(.+)ESP=(.+)$/){    }
-    elsif(/^LDT=($hex+) ($hex+) ($hex+) ($hex+)$/){}
-    elsif(/^LDT=($hex+)\s($hex+)\s($hex+)\s($hex+)\sDPL=($hex+)\sLDT$/){}
-    elsif(/^R8\s=($hex+)\sR9\s=($hex+)\sR10=($hex+)\sR11=($hex+)$/){}
-    elsif(/^R12=($hex+)\sR13=($hex+)\sR14=($hex+)\sR15=($hex+)/){}
-    elsif(/^RAX=($hex+)\sRBX=($hex+)\sRCX=($hex+)\sRDX=($hex+)/){    }
-    elsif(/^RIP=($hex+)\sRFL=($hex+)\sCPL=($hex+)\sII=($hex+)\sA20=($hex+)\sSMM=($hex+)\sHLT=($hex+)/) {}
-    elsif(/^RSI=($hex+)\sRDI=($hex+)\sRBP=($hex+)\sRSP=($hex+)/){}
-    elsif(/^TR\s=($hex+) ($hex+) ($hex+) ($hex+)$/){}
-    elsif(/^TR\s=($hex+)\s($hex+)\s($hex+)\s($hex+)\sDPL=($hex+)\s(TSS(32|64))\-(busy|avl)$/){}
-    elsif(/^[CSEDFG]S\s=($hex+) ($hex+) ($hex+) ($hex+)$/){ }
-    elsif(/^CS\s=($hex+)\s($hex+)\s($hex+)\s($hex+)\sDPL=($hex+)\sCS(64|32)\s(.+)$/){}
-    elsif(/^[GI]DT=\s+($hex+) ($hex+)$/){}
-    elsif(/^RIP=($hex+)\sRFL=($hex+)\s\[([\-ZACSP]+)\]\sCPL=($hex+)\sII=($hex+)\sA20=($hex+)\sSMM=($hex+)\sHLT=($hex+)$/){}
-#    elsif(/^RIP=($hex+)\sRFL=($hex+)\sCPL=($hex+)\sII=($hex+)\sA20=($hex+)\sSMM=($hex+)\sHLT=($hex+)$/){}
+    elsif(@d=/Stopped execution of TB chain before 0x($hex+) \[($hex+)\]\s*(.+)?\s*$/){
+	#print "STrace",join("|",@d),"\n";	
+    }
+    elsif(@d=/Trace 0x($hex+) \[($hex+)\]\s*(.+)?\s*$/){
+	# last is function name
+	#print "Trace",join("|",@d),"\n";
+    }
+    elsif(
+	@d=/Linking TBs 0x($hex+) \[($hex+)\] index ($hex+) -> 0x($hex+) \[($hex+)\]/
+	){
+	#print "Linking",join("|",@d),"\n";
+    }
     else {
 	print "elsif(/";
 	while (/^(\w+)\s?=(.+)/g){

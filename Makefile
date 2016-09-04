@@ -101,3 +101,9 @@ cscope:
 	find -L $(cscope_dirs) -maxdepth 1 \
 		-name '*.[chsS]' -print | sed 's,^\./,,' | sort -u > ./cscope.files
 	cscope -bk
+
+generatetest:
+	bash -x run_qemu.sh > exec.txt 2> exec2.txt
+
+mytest:
+	perl parse.pl  exec2.txt 
