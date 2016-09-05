@@ -1524,7 +1524,7 @@
 
 # trace:qemu_memalign,qemu_memalign,qemu_anon_ram_alloc,ledma_memory_read,espdma_memory_read,espdma_memory_write,lm32_timer_memory_write,lm32_timer_memory_read,lm32_uart_memory_write,lm32_uart_memory_read,milkymist_ac97_memory_read,milkymist_ac97_memory_write,milkymist_tmu2_memory_read,milkymist_tmu2_memory_write,milkymist_uart_memory_read,milkymist_uart_memory_write,milkymist_vgafb_memory_read,milkymist_vgafb_memory_write,memory_region_ops_read,memory_region_ops_write,memory_region_subpage_read,memory_region_subpage_write,memory_region_tb_read,memory_region_tb_write,milkymist_sysctl_memory_read,milkymist_sysctl_memory_write,milkymist_softusb_memory_read,milkymist_softusb_memory_write,milkymist_hpdmc_memory_read,milkymist_hpdmc_memory_write,milkymist_memcard_memory_read,milkymist_memcard_memory_write,milkymist_minimac2_memory_read,milkymist_minimac2_memory_write,milkymist_minimac2_mdio_write,milkymist_minimac2_mdio_read,milkymist_pfpu_memory_read,milkymist_pfpu_memory_write,ledma_memory_write
 
-qemu-system-x86_64    -d out_asm,in_asm,op,op_opt,int,exec,cpu,mmu,pcall,cpu_reset,unimp,guest_errors,page,nochain -device pc-testdev   -device isa-debug-exit,iobase=0xf4,iosize=0x4   -serial stdio   -device pci-testdev   -kernel ./x86/msr.flat
+qemu-system-x86_64    -d out_asm,in_asm,op,op_opt,int,exec,cpu,mmu,pcall,cpu_reset,unimp,guest_errors,page,nochain -device pc-testdev   -device isa-debug-exit,iobase=0xf4,iosize=0x4   -serial stdio   -device pci-testdev   -kernel ./x86/realmode.flat
 
 #
 #qemu-system-x86_64  -d cpu  -device pc-testdev -device isa-debug-exit, iobase=0xf4, \ iosize=0x4  -serial stdio -device pci-testdev -kernel ./x86/msr.flat 

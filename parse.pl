@@ -6,6 +6,29 @@ my %names ;
 my $hex = '[a-f0-9]';
 my %seen;
 
+sub rec {
+    my $d = shift;
+    while ($d =~ /(\w+\s?)=(.+)/g){
+	print '\s'. "${1}=(\$hex+)";
+	rec($2);
+    }
+}
+
+sub start {
+	print "elsif(/";
+	while (/^(\w+)\s?=(.+)/g){
+	    if (!$names{$1}) {	   
+		print "^$1=(\$hex+)";
+		rec($2);
+	    }
+	    $names{$1}++;
+	    #my @parts = split('=');
+	    #warn join("|",@parts);
+	}
+	print "\$/){}\n";
+
+}
+
 sub data {
     my $hash = shift;
     #print Dumper($hash);
@@ -18,16 +41,17 @@ sub data {
 	    my $t = lc($new . $old);
 	    if ($t =~ /^[a-f0-9]+$/) {
 
-
-		my $diff = hex($new) - hex($old );
+		$new =~ s/0x//g;
+		$old =~ s/0x//g;
+		my $diff = hex($new) - hex($old);
 		#print "Update $x from $old to $new  diff $diff\n";
 
-		if ($seen{$new}){
+		#if ($seen{$new}){
 
 		    #if (!$seen{"$old$new"}++){
-			print "\"$old\" -> \"$new\";\n";
+		print "$x \"$old\" -> \"$new\" = $diff\n";
 		    #}
-		}
+		#}
 		$seen{$new}++;
 	    }
 	}
@@ -79,7 +103,10 @@ sub proc2a {
     data({	$name => join("",@args) }). "\n";
 }
 
-print "digraph G {\n";
+my %errors;
+
+#print "digraph G {\n";
+my $state = 'NORMAL';
 while(<>){
     chomp;
     #print "CHECK INPUT:'$_'\n";
@@ -117,19 +144,34 @@ while(<>){
 	# skip
     }
     elsif(@d=/Stopped execution of TB chain before 0x($hex+) \[($hex+)\]\s*(.+)?\s*$/){
+	$state = "STOP";
 	#print "STrace",join("|",@d),"\n";	
     }
     elsif(@d=/Trace 0x($hex+) \[($hex+)\]\s*(.+)?\s*$/){
 	# last is function name
 	#print "Trace",join("|",@d),"\n";
+	$state = "TRACE";
     }
-    elsif(
-	@d=/Linking TBs 0x($hex+) \[($hex+)\] index ($hex+) -> 0x($hex+) \[($hex+)\]/
-	){
+
+    elsif(@d=/PROLOGUE:/){	$state = "PROLOGUE";    }
+    elsif(@d=/IN:/){	$state = "IN";    }
+    elsif(@d=/OP:/){	$state = "OP";    }
+    elsif(@d=/OP after optimization and liveness analysis/){	$state = "OP2";    }
+    elsif(@d=/OUT:/){	$state = "OUT";    }
+    elsif(@d=/CPU Reset/){	$state = "CPU Reset";    }
+    
+    
+    
+    elsif(@d=/Linking TBs 0x($hex+) \[($hex+)\] index ($hex+) -> 0x($hex+) \[($hex+)\]/){
 	#print "Linking",join("|",@d),"\n";
+	$state = "LINK";
     }
     else {	
-	warn "BAD:'$_'";
+
+	#if (!($errors{$_}++)) {
+	    print "BAD: $state '$_'";
+	    start();
+	#}
     }
 
     
