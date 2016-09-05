@@ -104,10 +104,13 @@ cscope:
 	cscope -bk
 
 generatetest:
-	bash -x run_qemu.sh > realmode.flat.txt 2> realmode.flat.out
+	bash -x run_qemu.sh x86/hello.flat
+
+generatetest2:
+	bash -x run_qemu2.sh x86/hello.flat
 
 parse:
-	perl parse.pl realmode.flat.out
+	perl parse.pl x86/hello.flat.*.out
 
 stash :
 	/opt/logstash/bin/logstash -f logstash.conf #--configtest

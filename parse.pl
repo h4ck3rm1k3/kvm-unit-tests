@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use Data::Dumper;
 
+
 my %names ;
 my $hex = '[a-f0-9]';
 my %seen;
@@ -12,6 +13,10 @@ sub rec {
 	print '\s'. "${1}=(\$hex+)";
 	rec($2);
     }
+}
+
+sub emit {
+
 }
 
 sub start {
@@ -43,14 +48,14 @@ sub data {
 
 		$new =~ s/0x//g;
 		$old =~ s/0x//g;
-		my $diff = hex($new) - hex($old);
+		#my $diff = hex($new) - hex($old);
 		#print "Update $x from $old to $new  diff $diff\n";
 
 		#if ($seen{$new}){
 
-		    #if (!$seen{"$old$new"}++){
-		print "$x \"$old\" -> \"$new\" = $diff\n";
-		    #}
+		#if (!$seen{"$old$new"}++){
+		emit "$x \"$old\" -> \"$new\"\n";
+		#}
 		#}
 		$seen{$new}++;
 	    }
@@ -107,7 +112,9 @@ my %errors;
 
 #print "digraph G {\n";
 my $state = 'NORMAL';
-while(<>){
+for my $filename (@ARGV) {
+    open IN,$filename;
+    while(<IN>){
     chomp;
     #print "CHECK INPUT:'$_'\n";
     my @d;
@@ -125,34 +132,27 @@ while(<>){
     elsif(@d=/^(CR0)=($hex+)\s(CR2)=($hex+)\s(CR3)=($hex+)\s(CR4)=($hex+)$/){	proc @d;    }
     elsif(@d=/^(RIP)=($hex+)\s(RFL)=($hex+)\s(CPL)=($hex+)\s(II)=($hex+)\s(A20)=($hex+)\s(SMM)=($hex+)\s(HLT)=($hex+)/) {	proc @d;    }
     elsif(@d=/^(RIP)=($hex+)\s(RFL)=($hex+)(\s)\[([\-ZACSP]+)\]\s(CPL)=($hex+)\s(II)=($hex+)\s(A20)=($hex+)\s(SMM)=($hex+)\s(HLT)=($hex+)$/){	proc @d;    }
-    elsif(@d=/^(RSI)=($hex+)\s(RDI)=($hex+)\s(RBP)=($hex+)\s(RSP)=($hex+)/){	proc @d;    }
-
-    
+    elsif(@d=/^(RSI)=($hex+)\s(RDI)=($hex+)\s(RBP)=($hex+)\s(RSP)=($hex+)/){	proc @d;    }  
     elsif(@d=/^([GECSDF]S)\s=($hex+)\s($hex+)\s($hex+)\s($hex+)\sDPL=($hex+)\s([CSDEFG]S(?:16|32)?)?\s+\[(.+)\]$/){	proc4 @d;    }
     elsif(@d=/^(TR)\s=($hex+)\s($hex+)\s($hex+)\s($hex+)\s(DPL)=($hex+)\s(TSS(?:32|64))\-(busy|avl)$/){	proc4 @d;    }
     elsif(@d=/^(CS)\s=($hex+)\s($hex+)\s($hex+)\s($hex+)\s(DPL)=($hex+)\s(CS(?:64|32))\s(.+)$/){	proc4 @d;    }
     elsif(@d=/^(LDT)=($hex+)\s($hex+)\s($hex+)\s($hex+)\s(DPL)=($hex+)\s(LDT)$/){	proc4 @d;    }
-    
-    ###
-
     elsif(@d=/^([CSEDFG]S)\s*=($hex+) ($hex+) ($hex+) ($hex+)$/){ 	proc4a @d;    }
     elsif(@d=/^(LDT)=($hex+) ($hex+) ($hex+) ($hex+)$/){	proc4a @d;    }
     elsif(@d=/^(TR)\s=($hex+) ($hex+) ($hex+) ($hex+)$/){	proc4a @d;    }
-
     elsif(@d=/^([GI]DT)=\s+($hex+) ($hex+)$/){proc2a @d; }
     elsif(/\+ qemu-system-x86_64/) {
-	# skip
+	# skip the starting command line from bash
     }
     elsif(@d=/Stopped execution of TB chain before 0x($hex+) \[($hex+)\]\s*(.+)?\s*$/){
 	$state = "STOP";
-	#print "STrace",join("|",@d),"\n";	
+	emit "STrace",join("|",map { $_ || "" }@d),"\n";	
     }
     elsif(@d=/Trace 0x($hex+) \[($hex+)\]\s*(.+)?\s*$/){
 	# last is function name
-	#print "Trace",join("|",@d),"\n";
+	emit "Trace",join("|",map { $_ || "" }@d),"\n";
 	$state = "TRACE";
     }
-
     elsif(@d=/PROLOGUE:/){	$state = "PROLOGUE";    }
     elsif(@d=/IN:/){	$state = "IN";    }
     elsif(@d=/OP:/){	$state = "OP";    }
@@ -163,17 +163,16 @@ while(<>){
     
     
     elsif(@d=/Linking TBs 0x($hex+) \[($hex+)\] index ($hex+) -> 0x($hex+) \[($hex+)\]/){
-	#print "Linking",join("|",@d),"\n";
+	emit "Linking",join("|",@d),"\n";
 	$state = "LINK";
     }
     else {	
-
 	#if (!($errors{$_}++)) {
-	    print "BAD: $state '$_'";
+	#print join(" ",@ARGV);
+	print "BAD: $filename $state '$_'";
 	    start();
 	#}
+    }   
     }
-
-    
+    close IN;
 }
-print "}";
